@@ -1,0 +1,77 @@
+import Control.Monad (when)
+-- FUNCIONES
+
+fact1 :: Integer-> Integer
+fact1 n = if n == 0 then 1
+ else n * fact1 (n-1)
+
+combinaciones :: Integer -> Integer -> Integer
+combinaciones n k = (fact1 n) `div` ((fact1 k) * (fact1 (n-k)))
+
+comprobacionimpar :: Integer -> Integer
+comprobacionimpar x = if x < 0 then -x else x
+
+sumaCuadrados :: Integer -> Integer
+sumaCuadrados n = sum [x*x | x <- [1..n]]
+
+esImpar :: Integer -> Bool
+esImpar n = n `mod` 2 /= 0
+
+signo :: Integer -> Integer
+signo x
+    | x > 0 = 1
+    | x < 0 = -1
+    | otherwise = 0
+
+-- MENU DINAMICO
+
+mostrarMenu :: [(String, IO ())] -> IO ()
+mostrarMenu lista = do
+    putStrLn "Seleccione ejercicio:"
+    mapM_ (\(i,(nombre,_)) -> putStrLn $ show i ++ ". " ++ nombre) (zip [1..] lista)
+    op <- readLn
+    when (op > 0 && op <= length lista) $ do
+        let (_, accion) = lista !! (op-1)
+        accion
+
+-- UNIDAD I
+unidad1 :: IO ()
+unidad1 = do
+    putStrLn "\n I Programacion basica "
+    putStrLn "\n Unidad 1: Introduccion a la programacion funcional "
+    let ejerciciosUnidad1 =
+            [("Factorial", do { putStrLn "Ingrese un numero:"; n <- readLn; print (fact1 n) }),
+            ("Numero de combinaciones", do
+            putStrLn "Ingrese n:"
+            n <- readLn 
+            putStrLn "Ingrese k:" 
+            k <- readLn 
+            print (combinaciones n k)),
+            ("Comprobacion numero impar", do { putStrLn "Ingrese un numero:"; x <- readLn; print (valorAbsoluto x) })
+            ]
+    mostrarMenu ejerciciosUnidad1
+
+-- UNIDAD II
+
+unidad2 :: IO ()
+unidad2 = do
+    putStrLn "\n=== Unidad 2: Algebra y numeros ==="
+    let ejerciciosUnidad2 =
+            [("Suma de cuadrados", do { putStrLn "Ingrese n:"; n <- readLn; print (sumaCuadrados n) })
+            ,("Comprobacion de impar", do { putStrLn "Ingrese un numero:"; n <- readLn; print (esImpar n) })
+            ,("Signo de un numero", do { putStrLn "Ingrese un numero:"; x <- readLn; print (signo x) })
+            ]
+    mostrarMenu ejerciciosUnidad2
+
+--MENU PRINCIPAL
+main :: IO ()
+main = do
+    putStrLn "=== MENU PRINCIPAL ==="
+    putStrLn "Seleccione unidad:"
+    putStrLn "1. Unidad 1: Introduccion a la programacion funcional"
+    putStrLn "2. Unidad 2: Algebra y numeros"
+    unidad <- getLine
+    case unidad of
+        "1" -> unidad1
+        "2" -> unidad2
+        _   -> putStrLn "Opcion invalida"
