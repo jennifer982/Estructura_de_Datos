@@ -1,9 +1,14 @@
 import Control.Monad (when)
--- FUNCIONES
+import Data.List ((\\))
+import GHC.Stats (RTSStats(cumulative_live_bytes))
+import System.Directory (doesFileExist, copyFile)
+import Data.List (sort)
+
+-- UNIDAD I
 
 fact1 :: Integer-> Integer
 fact1 n = if n == 0 then 1
- else n * fact1 (n-1)
+else n * fact1 (n-1)
 
 combinaciones :: Integer -> Integer -> Integer
 combinaciones n k = (fact1 n) `div` ((fact1 k) * (fact1 (n-k)))
@@ -11,8 +16,14 @@ combinaciones n k = (fact1 n) `div` ((fact1 k) * (fact1 (n-k)))
 comprobacionimpar :: Integer -> Integer
 comprobacionimpar x = if x < 0 then -x else x
 
+cuadrado_1 :: Num a => a-> a
+cuadrado_1 x = x*x
+
 sumaCuadrados :: Integer -> Integer
 sumaCuadrados n = sum [x*x | x <- [1..n]]
+
+valorabsolutoC :: (Num a, Ord a) => a-> a
+valorabsolutoC x = if x>0 then x else (-x)
 
 esImpar :: Integer -> Bool
 esImpar n = n `mod` 2 /= 0
@@ -22,6 +33,428 @@ signo x
     | x > 0 = 1
     | x < 0 = -1
     | otherwise = 0
+
+(&&&) :: Bool-> Bool-> Bool
+False &&& x = False
+True &&& x = x
+
+anterior_1 :: Int -> Int
+anterior_1 n = n - 1
+
+potencia_2 :: Num a => a-> Int-> a
+potencia_2 x n = if n==0 then 1
+                else x * potencia_2 x (n-1)
+
+
+-- unidad II
+siguiente_1 ::Integer->Integer
+siguiente_1 =(+1)
+
+doble_1 :: Num a => a-> a
+doble_1 x = 2 * x
+
+mitad_1 :: Double-> Double
+mitad_1 x = x/2
+
+inverso_1 :: Double-> Double
+inverso_1 x = 1/x
+
+dosElevadoA_1 :: Int-> Int
+dosElevadoA_1 x = 2^x
+
+esPositivo_1 :: Int-> Bool
+esPositivo_1 x = x>0
+
+-- Definicion recursiva
+n_map_1 :: (a -> b) -> [a] -> [b]
+n_map_1 f []     = []
+n_map_1 f (x:xs) = f x : n_map_1 f xs
+
+-- definicion recursiva 
+n_sum_1 :: Num a => [a]-> a
+n_sum_1 []       = 0
+n_sum_1 (x:xs) = x + n_sum_1 xs
+
+--definicion recursiva 
+factoriales_1 :: Integer-> [Integer]
+factoriales_1 n = reverse (aux n)
+    where 
+        aux 0 = [1]
+        aux k = (fact1 k ): aux ( k - 1)
+
+primo :: Int -> Bool
+primo n
+    | n < 2     = False
+    | otherwise = all (\x -> n `mod` x /= 0) [2..(floor . sqrt $ fromIntegral n)]
+
+-- mediante filtrado 
+primos_1 :: Int-> [Int]
+primos_1 x = filter primo [1..x]
+
+--Definir la función puntoCero tal que puntoCero f es un cero de la función f calculado usando la siguiente propiedad
+-- Metodo Newton-Raphson
+-- Método de Newton-Raphson
+puntoCero :: (Double -> Double) -> Double -> Double
+puntoCero f x0 = until aceptable mejorar x0
+    where
+        mejorar b   = b - f b / derivadaFina f b
+        aceptable b = abs (f b) < 1e-5
+
+-- Derivada aproximada (diferencia finita)
+derivadaFina :: (Double -> Double) -> Double -> Double
+derivadaFina f x = (f (x + h) - f x) / h
+    where h = 0.00001
+
+
+
+---UNIDAD III
+igualLista :: Eq a => [a] -> [a]-> Bool
+igualLista []     []     = True
+igualLista (x:xs) (y:ys) = x==y && igualLista xs ys
+igualLista _       _     = False
+
+
+conc :: [a]-> [a]-> [a]
+conc []    ys = ys
+conc (x:xs) ys = x : (conc xs ys)
+
+n_head :: [a]-> a
+n_head (x:_) = x
+
+-- Definicion recursiva
+n_init_1 :: [a]-> [a]
+n_init_1 [x]   = []
+n_init_1 (x:xs) = x : n_init_1 xs
+
+nth :: [a]-> Int-> a
+nth (x:_) 0 = x
+nth (_:xs) n = nth xs (n-1)
+
+n_reverse_1 :: [a]-> [a]
+n_reverse_1 []    = []
+n_reverse_1 (x:xs) = n_reverse_1 xs ++ [x]
+
+inserta :: Ord a => a-> [a]-> [a]
+inserta e []     = [e]
+inserta e (x:xs)
+    | e <= x     = e:x:xs
+    | otherwise = x : inserta e xs
+
+mezcla_1 :: Ord a => [a]-> [a]-> [a]
+mezcla_1 [] ys          = ys
+mezcla_1 xs []          = xs
+mezcla_1 (x:xs) (y:ys)
+    | x <= y        = x : mezcla_1 xs (y:ys)
+    | otherwise     = y : mezcla_1 (x:xs) ys
+
+n_iterate :: (a-> a)-> a-> [a]
+n_iterate f x = x : n_iterate f (f x)
+
+
+n_splitAt :: Int-> [a]-> ([a], [a])
+n_splitAt n xs | n <= 0 = ([],xs)
+n_splitAt _ []          = ([],[])
+n_splitAt n (x:xs)      = (x:xs',xs'')
+    where (xs',xs'') = n_splitAt (n-1) xs
+
+
+--UNIDAD IV
+iniciales ::[a]->[[a]]
+iniciales [] =[[]]
+iniciales (x:xs)= []:[x:ys |ys <-iniciales xs]
+
+finales :: [a]-> [[a]]
+finales []     = [[]]
+finales (x:xs) = (x:xs) : finales xs
+
+segmentos :: [a]-> [[a]]
+segmentos []    = [[]]
+segmentos (x:xs) = segmentos xs ++ [x:ys | ys <- iniciales xs]
+
+sublistas :: [a]-> [[a]]
+sublistas []     = [[]]
+sublistas (x:xs) = [x:ys | ys <- sub] ++ sub
+                    where sub = sublistas xs
+
+--definicion recursiva 
+subconjunto_1 :: Eq a => [a]-> [a]-> Bool
+subconjunto_1 []      _ = True
+subconjunto_1 (x:xs) ys = elem x ys && subconjunto_1 xs ys
+
+--igualdad de conjuntos- usando subconjuntos
+igual_conjunto_1 :: Eq a => [a]-> [a]-> Bool
+igual_conjunto_1 xs ys = subconjunto_1 xs ys && subconjunto_1 ys xs
+
+-- por eleccion y recursion
+permutaciones_1 :: Eq a => [a]-> [[a]]
+permutaciones_1 [] = [[]]
+permutaciones_1 xs = [a:p | a <- xs, p <- permutaciones_1(xs \\ [a])]
+
+-- mediante sublistas
+combinaciones_1 :: Int-> [a]-> [[a]]
+combinaciones_1 n xs = [ys | ys <- sublistas xs, length ys == n]
+
+type Tablero = [Int]
+reinas :: Int-> [Tablero]
+reinas n = reinasAux n
+    where 
+        reinasAux 0 = [[]]
+        reinasAux m = [r:rs | rs <- reinasAux m,
+                                r <- ([1..n] \\ rs),
+                                noAtaca r rs 1]
+noAtaca :: Int-> Tablero-> Int-> Bool
+noAtaca _ [] _ = True
+noAtaca r (a:rs) distH = abs(r-a) /= distH && noAtaca r rs (distH+1)
+
+mezcla2 :: [Int] -> [Int] -> [Int]
+mezcla2 xs [] = xs
+mezcla2 [] ys = ys
+mezcla2 (x:xs) (y:ys)
+    | x < y     = x : mezcla2 xs (y:ys)
+    | x > y     = y : mezcla2 (x:xs) ys
+    | otherwise = x : mezcla2 xs ys  -- evita duplicados
+mezcla3 :: [Int] -> [Int] -> [Int] -> [Int]
+mezcla3 xs ys zs = mezcla2 xs (mezcla2 ys zs)
+
+hamming :: [Int]
+hamming = 1 : mezcla3 [2*x | x <- hamming]
+                        [3*x | x <- hamming]
+                        [5*x | x <- hamming]
+--UNIDAD V
+cambioEuro :: Double
+cambioEuro = 166.386
+
+pesetas :: Double -> Double
+pesetas x = x * cambioEuro
+
+euros :: Double -> Double
+euros x = x / cambioEuro
+
+cuadrado :: Integer-> Integer
+cuadrado x = x * x
+
+--usando condicionales 
+n_abs_1 :: Integer-> Integer
+n_abs_1 x = if x>0 then x else (-x)
+
+potencia :: Integer-> Integer-> Integer
+potencia x 0      = 1
+potencia x n | n>0 = x * potencia x (n-1)
+
+regiones :: Integer-> Integer
+regiones 0 = 1
+regiones n | n>0 = regiones (n-1) + n
+
+--UNIDAD VI
+
+f :: Integer -> Integer
+f x = x * 2  
+
+esGrande :: Integer -> Bool
+esGrande n = n > 9999
+
+data Lista a = Vacia | Añade a (Lista a)
+    deriving (Show, Eq, Read)
+
+longitudLista :: Lista a -> Integer
+longitudLista Vacia        = 0
+longitudLista (Añade _ xs) = 1 + longitudLista xs
+
+
+concLista :: Lista a -> Lista a -> Lista a
+concLista Vacia ys       = ys
+concLista (Añade x xs) ys = Añade x (concLista xs ys)
+
+inversaLista :: Lista a -> Lista a
+inversaLista Vacia        = Vacia
+inversaLista (Añade x xs) = concLista (inversaLista xs) (Añade x Vacia)
+
+
+--UNIDAD VII
+
+maxI :: Integer-> Integer-> Integer
+maxI x y | x >= y = x
+        | otherwise = y
+
+sumaCuadrados2 :: Integer-> Integer
+sumaCuadrados2 0 = 0
+sumaCuadrados2 n 
+    | n > 0 = sumaCuadrados (n-1) + n*n
+
+potencia2 :: Integer-> Integer-> Integer
+potencia2 x 0 = 1
+potencia2 x n 
+    | n>0 = x * potencia x (n-1)
+
+hanoi :: Integer -> Integer
+hanoi 1 = 1
+hanoi n
+    | n > 1   = 1 + 2 * hanoi (n - 1)
+
+
+fib :: Integer-> Integer
+fib 0 = 1
+fib 1 = 1
+fib n
+    | n > 1   = fib (n-1) + fib (n-2)
+
+divide :: Integer-> Integer-> Bool
+divide a b = b `mod` a == 0
+
+multiplica :: Num a => [a]-> a
+multiplica []  = 1
+multiplica (x:xs) = x * multiplica xs
+
+duplicados :: Eq a => [a]-> Bool
+duplicados []  = False
+duplicados (x:xs) = elem x xs || duplicados xs
+
+data Mes 
+        = Enero
+        | Febrero
+        | Marzo
+        | Abril
+        | Mayo
+        | Junio
+        | Julio
+        | Agosto
+        | Septiembre
+        | Octubre
+        | Noviembre
+        | Diciembre
+        deriving (Eq, Show, Read)
+
+esPrimerSemestre :: Mes -> Bool
+esPrimerSemestre mes = mes `elem` [Enero, Febrero, Marzo, Abril, Mayo, Junio]
+
+
+--UNIDAD VIII
+
+esPermutacion :: Eq a => [a]-> [a]-> Bool
+esPermutacion []    []    = True
+esPermutacion []   (y:ys) = False
+esPermutacion (x:xs) ys  = elem x ys && esPermutacion xs (borra x ys)
+borra :: Eq a => a-> [a]-> [a]
+borra x []                = []
+borra x (y:ys) | x == y = ys
+                | otherwise = y : borra x ys
+
+
+ordenada :: Ord a => [a]-> Bool
+ordenada []       = True
+ordenada [_]      = True
+ordenada (x:y:xs) = (x <= y) && ordenada (y:xs)
+
+
+pares :: [a] -> [(a,a)]
+pares [] = []
+pares [_] = []
+pares (x:y:xs) = (x,y) : pares (y:xs)
+pascal :: Integer-> [Integer]
+pascal 1 = [1]
+pascal n = [1] ++ [ x+y | (x,y) <- pares (pascal (n-1)) ] ++ [1]
+
+
+elimina :: Int-> [Int]-> [Int]
+elimina n xs = [ x | x <- xs, x `mod` n /= 0 ]
+
+
+primos1a100 :: [Int]
+primos1a100 = [2,3,5,7,11,13,17,19,23,29,31,37,41,43,47,53,59,61,67,71,73,79,83,89,97]
+esPrimo100 :: Int-> Bool
+esPrimo100 n = n `elem` primos1a100
+
+todosOcurrenEn :: Eq a => [a] -> [a] -> Bool
+todosOcurrenEn xs ys = and [x `elem` ys | x <- xs]
+
+posiciones :: [a]-> [(a,Int)]
+posiciones xs = zip xs [0..]
+
+ternasPitagoricas :: Int-> [(Int,Int,Int)]
+ternasPitagoricas n = [ (a,b,c)
+                        | a <- [1..n]
+                        , b <- [a..n]
+                        , c <- [b..n]
+                        , a^2 + b^2 == c^2
+                        ]
+
+--UNIDAD IX
+copiaFichero :: FilePath-> FilePath-> IO ()
+copiaFichero f1 f2 = do 
+    contenido <- readFile f1
+    writeFile f2 contenido
+
+escribe :: Show a => IO a-> IO ()
+escribe io = do 
+    resultado <- io
+    print resultado
+
+data Partido
+    = P1 | P2 | P3 | P4 | P5 | P6 | P7 | P8
+    deriving ( Eq, Ord, Show, Read )
+
+copiaFichero1 :: FilePath-> FilePath-> IO ()
+copiaFichero1 f1 f2 = do 
+    existe <- doesFileExist f1
+    if existe
+    then copyFile f1 f2
+    else return ()
+
+ordenaFichero :: FilePath-> FilePath-> IO ()
+ordenaFichero f1 f2 = do    
+    s <- readFile f1
+    writeFile f2 (unlines (sort (lines s)))
+
+escribeTabla :: [String]-> IO ()
+escribeTabla xs =
+    sequence_ [ putStrLn (show i ++ ": " ++ x)
+                | (x,i) <- xs `zip` [1..] ]
+
+juego1 :: IO ()
+juego1 = do 
+    putStrLn "Piensa un numero entre el 1 y el 100."
+    adivina 1 100
+    putStrLn "Fin del juego"
+adivina :: Int-> Int-> IO ()
+adivina a b = do 
+    putStr ("Es " ++ show conjetura ++ "? [mayor/menor/exacto] ")
+    s <- getLine
+    case s of
+        "mayor" -> adivina (conjetura+1) b
+        "menor" -> adivina a (conjetura-1)
+        "exacto"-> return ()
+        _       -> adivina a b
+    where
+        conjetura = (a+b) `div` 2
+
+--UNIDAD X
+data Fichero = Fichero String
+                | Dir String [Fichero]
+                deriving (Eq, Show)
+type SistemaFicheros = [Fichero]
+
+
+
+data Prop = Var Nombre
+            | Prop :& Prop
+            | Prop :| Prop
+            | No Prop
+            deriving ( Eq, Show )
+type Nombre = String
+
+
+data Expr = Num Integer
+            | Sum Expr Expr
+            | Pro Expr Expr
+            deriving Eq
+
+
+--UNIDAD XI
+exito :: a-> ReadS a
+exito x = \c-> [(x,c)]
+
+--UNIDAD XII
+--UNIDAD XIII
 
 -- MENU DINAMICO
 
@@ -40,14 +473,65 @@ unidad1 = do
     putStrLn "\n I Programacion basica "
     putStrLn "\n Unidad 1: Introduccion a la programacion funcional "
     let ejerciciosUnidad1 =
-            [("Factorial", do { putStrLn "Ingrese un numero:"; n <- readLn; print (fact1 n) }),
+
+            [("Factorial", do 
+            putStrLn "Ingrese un numero:"; 
+            n <- readLn; print (fact1 n)),
+
             ("Numero de combinaciones", do
             putStrLn "Ingrese n:"
             n <- readLn 
             putStrLn "Ingrese k:" 
             k <- readLn 
             print (combinaciones n k)),
-            ("Comprobacion numero impar", do { putStrLn "Ingrese un numero:"; x <- readLn; print (valorAbsoluto x) })
+
+            ("Comprobacion numero impar", do  
+            putStrLn "Ingrese un numero:"; 
+            x <- readLn; print (comprobacionimpar x)),
+            
+            ("cuadrado", do  
+            putStrLn "Ingrese un numero:"; 
+            x <- readLn; print (cuadrado_1 x)),
+
+            ("Suma de cuadrados", do
+            putStrLn "Ingrese un numero:";
+            n <- readLn
+            print (sumaCuadrados n)),
+
+            ("Valor Absoluto con Condicionales", do
+            putStrLn "Ingrese un numero:"
+            x <- readLn
+            print (valorabsolutoC x)),
+
+            ("Signo de un numero", do
+            putStrLn "Ingrese un numero:"
+            x <- readLn
+            print (signo x)),
+
+            ("Conjuncion logica (&&&)", do
+            putStrLn "Ingrese primer valor (True/False):"
+            a <- readLn
+            putStrLn "Ingrese segundo valor (True/False):"
+            b <- readLn
+            print (a &&& b)),
+
+            ("Numero anterior", do
+            putStrLn "Ingrese un numero:"
+            n <- readLn
+            print (anterior_1 n)),
+
+            ("Potencia recursiva", do
+            putStrLn "Ingrese la base:"
+            x <- readLn
+            putStrLn "Ingrese el exponente:"
+            n <- readLn
+            print (potencia_2 x n)),
+
+            ("Regresar", do
+                putStrLn "Regresando al menu principal..."
+                return ())
+
+            
             ]
     mostrarMenu ejerciciosUnidad1
 
@@ -55,23 +539,559 @@ unidad1 = do
 
 unidad2 :: IO ()
 unidad2 = do
-    putStrLn "\n=== Unidad 2: Algebra y numeros ==="
+    putStrLn "\n I Programacion basica "
+    putStrLn "\n Unidad 2: Numeros y Funciones "
     let ejerciciosUnidad2 =
-            [("Suma de cuadrados", do { putStrLn "Ingrese n:"; n <- readLn; print (sumaCuadrados n) })
-            ,("Comprobacion de impar", do { putStrLn "Ingrese un numero:"; n <- readLn; print (esImpar n) })
-            ,("Signo de un numero", do { putStrLn "Ingrese un numero:"; x <- readLn; print (signo x) })
-            ]
+
+            [("Numero siguiente", do
+            putStrLn "Ingrese un numero:"; 
+            n <- readLn; 
+            print (siguiente_1 n)),
+
+            ("Doble de un numero", do
+            putStrLn "Ingrese un numero:"; 
+            x <- readLn; 
+            print (doble_1 x)),
+
+            ("Mitad de un numero", do
+            putStrLn "Ingrese un numero:"; 
+            x <- readLn; 
+            print (mitad_1 x)),
+
+            ("Inverso de un nUmero", do
+            putStrLn "Ingrese un numero distinto de 0:"
+            x <- readLn
+            print (inverso_1 x)),
+
+            ("2 elevado a x", do
+            putStrLn "Ingrese un exponente:"; 
+            x <- readLn; 
+            print (dosElevadoA_1 x)),
+
+            ("Comprobar si es positivo", do
+            putStrLn "Ingrese un numero:"; 
+            x <- readLn; 
+            print (esPositivo_1 x)), 
+
+            ("Aplicar función a lista (map)", do
+            putStrLn "Ingrese una lista de enteros (ej: [1,2,3]):"
+            xs <- readLn
+            putStrLn "Ingrese un numero para multiplicar cada elemento:"
+            n <- readLn
+            print (n_map_1 (*n) xs)), 
+
+            ("Suma de lista", do
+            putStrLn "Ingrese una lista de numeros (ej: [1,2,3]):"
+            xs <- readLn
+            print (n_sum_1 xs)), 
+
+            ("Primos hasta n", do
+            putStrLn "Ingrese un numero:"
+            x <- readLn
+            print (primos_1 x)),
+
+            ("Cero de una funcion (Newton-Raphson)", do
+                putStrLn "Se usara la funcion f(x) = x^2 - 2"
+                let f x = x^2 - 2
+                let cero = puntoCero f 1.0
+                putStrLn $ "Cero aproximado: " ++ show cero),
+                
+                
+            ("Regresar", do
+                putStrLn "Regresando al menu principal..."
+                return ())]
     mostrarMenu ejerciciosUnidad2
+
+
+-- UNIDAD III
+
+unidad3 :: IO ()
+unidad3 = do
+    putStrLn "\n I Programacion basica "
+    putStrLn "\n Unidad 3: Estructura de datos "
+    let ejerciciosUnidad3 =
+            [("Comparar dos listas", do
+                putStrLn "Ingrese la primera lista (ej: [1,2,3]):"
+                lista1 <- readLn :: IO [Int]
+                putStrLn "Ingrese la segunda lista (ej: [1,2,3]):"
+                lista2 <- readLn :: IO [Int]
+                print (igualLista lista1 lista2)),
+
+                ("Concatenar listas", do
+                putStrLn "Ingrese la primera lista (ej: [1,2,3]):"
+                xs <- readLn :: IO [Int]
+                putStrLn "Ingrese la segunda lista (ej: [4,5,6]):"
+                ys <- readLn :: IO [Int]
+                print (conc xs ys)),
+
+                ("Primer elemento de una lista", do
+                putStrLn "Ingrese una lista (ej: [10,20,30]):"
+                xs <- readLn :: IO [Int]
+                print (n_head xs)),
+
+                ("Lista sin el ultimo elemento", do
+                putStrLn "Ingrese una lista (ej: [1,2,3,4]):"
+                xs <- readLn :: IO [Int]
+                print (n_init_1 xs)), 
+
+                ("Elemento en la posicion n", do
+                putStrLn "Ingrese una lista (ej: [10,20,30,40]):"
+                xs <- readLn :: IO [Int]
+                putStrLn "Ingrese el Indice (empezando desde 0):"
+                n <- readLn
+                print (nth xs n)),
+
+                ("Invertir una lista", do
+                putStrLn "Ingrese una lista (ej: [1,2,3,4]):"
+                xs <- readLn :: IO [Int]
+                print (n_reverse_1 xs)), 
+
+                ("Insertar elemento en lista ordenada", do
+                putStrLn "Ingrese una lista ordenada (ej: [1,3,5]):"
+                xs <- readLn :: IO [Int]
+                putStrLn "Ingrese el elemento a insertar:"
+                e <- readLn :: IO Int
+                print (inserta e xs)),
+
+                ("Mezclar dos listas ordenadas", do
+                putStrLn "Ingrese la primera lista ordenada (ej: [1,3,5]):"
+                xs <- readLn :: IO [Int]
+                putStrLn "Ingrese la segunda lista ordenada (ej: [2,4,6]):"
+                ys <- readLn :: IO [Int]
+                print (mezcla_1 xs ys)),
+
+                ("Generar lista iterativa con n_iterate", do
+                putStrLn "Ingrese un numero inicial (ej: 1):"
+                x <- readLn :: IO Int
+                putStrLn "Se aplicara f(x) = x + 1 (ejemplo), se mostraran los primeros 10 elementos:"
+                print (take 10 (n_iterate (+1) x))),
+
+                ("Dividir lista en dos con n_splitAt", do
+                putStrLn "Ingrese una lista (ej: [1,2,3,4,5]):"
+                xs <- readLn :: IO [Int]
+                putStrLn "Ingrese la posicion donde dividir:"
+                n <- readLn :: IO Int
+                print (n_splitAt n xs)),
+                
+                
+            ("Regresar", do
+                putStrLn "Regresando al menu principal..."
+                return ())]
+    mostrarMenu ejerciciosUnidad3
+
+
+---UNIDAD IV
+    
+unidad4 :: IO ()
+unidad4 = do
+    putStrLn "\n I Programacion basica "
+    putStrLn "\n Unidad 4: Aplicaciones de programacion funcional "
+    let ejerciciosUnidad4 =
+            [("Generar todas las iniciales de una lista con 'iniciales'", do
+                putStrLn "Ingrese una lista (ej: [1,2,3]):"
+                xs <- readLn :: IO [Int]
+                print (iniciales xs)),
+
+                ("Generar todos los finales de una lista con 'finales'", do
+                putStrLn "Ingrese una lista (ej: [1,2,3]):"
+                xs <- readLn :: IO [Int]
+                print (finales xs)),
+
+                ("Generar todos los segmentos de una lista con 'segmentos'", do
+                putStrLn "Ingrese una lista (ej: [1,2,3]):"
+                xs <- readLn :: IO [Int]
+                print (segmentos xs)),
+
+                ("Generar todas las sublistas de una lista con 'sublistas'", do
+                putStrLn "Ingrese una lista (ej: [1,2,3]):"
+                xs <- readLn :: IO [Int]
+                print (sublistas xs)),
+
+                ("Verificar igualdad de conjuntos con 'igual_conjunto_1'", do
+                putStrLn "Ingrese la primera lista (ej: [1,2,3]):"
+                xs <- readLn :: IO [Int]
+                putStrLn "Ingrese la segunda lista (ej: [3,2,1]):"
+                ys <- readLn :: IO [Int]
+                print (igual_conjunto_1 xs ys)),
+
+                ("Generar todas las permutaciones de una lista con 'permutaciones_1'", do
+                putStrLn "Ingrese una lista (ej: [1,2,3]):"
+                xs <- readLn :: IO [Int]
+                print (permutaciones_1 xs)),
+
+                ("Generar todas las combinaciones de tamaño n con 'combinaciones_1'", do
+                putStrLn "Ingrese una lista (ej: [1,2,3,4]):"
+                xs <- readLn :: IO [Int]
+                putStrLn "Ingrese el tamaño n de las combinaciones:"
+                n <- readLn :: IO Int
+                print (combinaciones_1 n xs)),
+
+                ("Generar los primeros n numeros de Hamming con 'hamming'", do
+                putStrLn "Ingrese cuántos números de Hamming desea ver:"
+                n <- readLn :: IO Int
+                print (take n hamming)),
+                
+                
+            ("Regresar", do
+                putStrLn "Regresando al menu principal..."
+                return ())]
+    mostrarMenu ejerciciosUnidad4
+
+---UNIDAD V
+
+
+unidad5 :: IO ()
+unidad5 = do
+    putStrLn "\n II Ejercicios del curso de K.L. Claessen Introduction to Functional Programming "
+    putStrLn "\n Unidad 5: Introduccion a la programacion funcional "
+    let ejerciciosUnidad5 =
+                [("Convertir euros a pesetas", do
+                putStrLn "Ingrese la cantidad en euros:"
+                e <- readLn :: IO Double
+                putStrLn $ show e ++ " euros son " ++ show (pesetas e) ++ " pesetas."),
+                ("Convertir pesetas a euros", do
+                putStrLn "Ingrese la cantidad en pesetas:"
+                p <- readLn :: IO Double
+                putStrLn $ show p ++ " pesetas son " ++ show (euros p) ++ " euros."),
+
+                ("Calcular el cuadrado de un numero", do
+                putStrLn "Ingrese un numero entero:"
+                n <- readLn :: IO Integer
+                putStrLn $ "El cuadrado de " ++ show n ++ " es " ++ show (cuadrado n)),
+
+                ("Calcular el valor absoluto de un numero", do
+                putStrLn "Ingrese un numero entero:"
+                n <- readLn :: IO Integer
+                putStrLn $ "El valor absoluto de " ++ show n ++ " es " ++ show (n_abs_1 n)),
+
+                ("Calcular la potencia de un numero", do
+                putStrLn "Ingrese la base (entero):"
+                x <- readLn :: IO Integer
+                putStrLn "Ingrese el exponente (entero >= 0):"
+                n <- readLn :: IO Integer
+                putStrLn $ show x ++ " ^ " ++ show n ++ " = " ++ show (potencia x n)),
+                
+                
+            ("Regresar", do
+                putStrLn "Regresando al menu principal..."
+                return ())]
+    mostrarMenu ejerciciosUnidad5
+
+---UNIDAD VI
+
+unidad6 :: IO ()
+unidad6 = do
+    putStrLn "\n II Ejercicios del curso de K.L. Claessen Introduction to Functional Programming "
+    putStrLn "\n Unidad 6: Modelizacion y tipos de datos "
+    let ejerciciosUnidad6 =
+            [("Ejercicio: esGrande", do
+                putStrLn "Ingrese un numero entero:"
+                n <- readLn :: IO Integer
+                putStrLn $ "esGrande " ++ show n ++ " = " ++ show (esGrande n)),
+            
+                ("Ejemplo de Lista: longitudLista", do
+                let miLista = Añade 1 (Añade 2 (Añade 3 Vacia))
+                putStrLn $ "Lista de ejemplo: " ++ show miLista
+                putStrLn $ "Longitud de la lista: " ++ show (longitudLista miLista)),
+
+                ("Concatenar dos listas personalizadas con 'concLista'", do
+                putStrLn "Ingrese la primera lista (ej: Añade 1 (Añade 2 Vacía)):"
+                xs <- readLn :: IO (Lista Int)
+                putStrLn "Ingrese la segunda lista (ej: Añade 3 (Añade 4 Vacía)):"
+                ys <- readLn :: IO (Lista Int)
+                putStrLn $ "Resultado de la concatenacion: " ++ show (concLista xs ys)),
+
+
+                ("Invertir una lista personalizada con 'inversaLista'", do
+            putStrLn "Ingrese la lista (ej: Añade 1 (Añade 2 Vacia)):"
+            xs <- readLn :: IO (Lista Int)
+            putStrLn $ "Lista invertida: " ++ show (inversaLista xs)),
+            
+            
+            ("Regresar", do
+                putStrLn "Regresando al menu principal..."
+                return ())]
+    mostrarMenu ejerciciosUnidad6
+
+---UNIDAD VII
+
+unidad7 :: IO ()
+unidad7 = do
+    putStrLn "\n II Ejercicios del curso de K.L. Claessen Introduction to Functional Programming"
+    putStrLn "\n Unidad 7: Recursion y tipos de datos "
+    let ejerciciosUnidad7 =
+            [("Maximo entre dos numeros", do
+            putStrLn "Ingrese el primer numero:"
+            x <- readLn
+            putStrLn "Ingrese el segundo numero:"
+            y <- readLn
+            print (maxI x y)),
+
+            ("Suma de cuadrados", do
+            putStrLn "Ingrese un numero:"
+            n <- readLn
+            print (sumaCuadrados2 n)), 
+            
+
+            ("Potencia recursiva", do
+            putStrLn "Ingrese la base:"
+            x <- readLn
+            putStrLn "Ingrese el exponente:"
+            n <- readLn
+            print (potencia2 x n)),
+
+            ("Fibonacci", do
+            putStrLn "Ingrese la posicion n:"
+            n <- readLn
+            print (fib n)), 
+
+            ("Divisible", do
+            putStrLn "Ingrese el divisor (a):"
+            a <- readLn
+            putStrLn "Ingrese el numero a verificar (b):"
+            b <- readLn
+            print (divide a b)),
+
+            ("Verificar duplicados en una lista", do
+            putStrLn "Ingrese una lista (ejemplo: [1,2,3,1]):"
+            xs <- readLn :: IO[Int]
+            print (duplicados xs)),
+
+            ("Es del primer semestre?", do
+            putStrLn "Ingrese un mes (Enero, Febrero, Marzo, ...):"
+            mesStr <- getLine
+            let mes = read mesStr :: Mes
+            print (esPrimerSemestre mes)),
+            
+            ("Regresar", do
+                putStrLn "Regresando al menu principal..."
+                return ())]
+    mostrarMenu ejerciciosUnidad7
+
+---UNIDAD VIII
+unidad8 :: IO ()
+unidad8 = do
+    putStrLn "\n II Ejercicios del curso de K.L. Claessen Introduction to Functional Programming "
+    putStrLn "\n Unidad 8:  Listas y Comprension "
+    let ejerciciosUnidad8 =
+            [("Numero siguiente", do
+            putStrLn "Ingrese un numero:"; 
+            n <- readLn; 
+            print (siguiente_1 n)),
+
+            ("Verificar si una lista esta ordenada", do
+            putStrLn "Ingrese una lista (ejemplo: [1,2,3,4]):"
+            xs <- readLn :: IO [Int]    
+            print (ordenada xs)),
+
+            ("Fila del triangulo de Pascal", do
+            putStrLn "Ingrese el numero de fila:"
+            n <- readLn :: IO Integer
+            print (pascal n)),
+
+            ("Eliminar multiplos de un numero", do
+            putStrLn "Ingrese un numero:"
+            n <- readLn :: IO Int
+            putStrLn "Ingrese una lista (ejemplo: [1,2,3,4,5,6]):"
+            xs <- readLn :: IO [Int]
+            print (elimina n xs)),
+
+            ("Es primo entre 2 y 100?", do
+            putStrLn "Ingrese un numero:"
+            n <- readLn :: IO Int
+            print (esPrimo100 n)),
+
+            ("¿Todos los elementos de una lista ocurren en otra?", do
+            putStrLn "Ingrese la primera lista (ejemplo: [1,5,2,5]):"
+            xs <- readLn :: IO [Int]
+            putStrLn "Ingrese la segunda lista (ejemplo: [5,1,2,4]):"
+            ys <- readLn :: IO [Int]
+            print (todosOcurrenEn xs ys)),
+
+            ("Mostrar posiciones de los elementos de una lista", do
+            putStrLn "Ingrese una lista (ejemplo: \"cama\" o [1,2,3,4]):"
+            xs <- readLn :: IO [Int]
+            print (posiciones xs)),
+
+            ("Ternas Pitagoricas", do
+            putStrLn "Ingrese un número límite (por ejemplo 20):"
+            n <- readLn :: IO Int
+            print (ternasPitagoricas n)),
+    
+            ("Regresar", do
+                putStrLn "Regresando al menu principal..."
+                return ())]
+    mostrarMenu ejerciciosUnidad8
+
+---UNIDAD IX
+
+unidad9 :: IO ()
+unidad9 = do
+    putStrLn "\n II Ejercicios del curso de K.L. Claessen Introduction to Functional Programming"
+    putStrLn "\n Unidad 9: Estructura de datos "
+    let ejerciciosUnidad9 =
+            [("Copiar fichero", do
+                putStrLn "Ingrese el nombre del archivo origen:"
+                f1 <- getLine
+                putStrLn "Ingrese el nombre del archivo destino:"
+                f2 <- getLine
+                copiaFichero f1 f2
+                putStrLn "Archivo copiado correctamente."),
+
+                ("Ejecutar accion y mostrar resultado (escribe)", do
+                putStrLn "Ingrese un numero para probar la funcion:"
+                escribe (readLn :: IO Int)),
+
+                ("Mostrar un partido", do
+                putStrLn "Ingrese un partido (por ejemplo: P1, P2, ... P8):"
+                partidoStr <- getLine
+                let partido = read  partidoStr :: Partido
+                print partido),
+
+                ("Numero siguiente", do
+                putStrLn "Ingrese un numero:"
+                n <- readLn
+                print (siguiente_1 n)),
+
+                ("Ordenar un fichero", do
+                putStrLn "Ingrese el nombre del archivo de entrada:"
+                f1 <- getLine
+                putStrLn "Ingrese el nombre del archivo de salida:"
+                f2 <- getLine
+                ordenaFichero f1 f2
+                putStrLn "Archivo ordenado correctamente."), 
+
+                ("Escribir tabla", do
+                putStrLn "Ingrese una lista de palabras (por ejemplo [\"uno\",\"dos\",\"tres\"]):"
+                xs <- readLn
+                escribeTabla xs),
+
+                ("Juego de adivinar numero", do
+                juego1),
+                
+            ("Regresar", do
+                putStrLn "Regresando al menu principal..."
+                return ())]
+    mostrarMenu ejerciciosUnidad9
+
+
+---UNIDAD X
+
+unidad10 :: IO ()
+unidad10 = do
+    putStrLn "\n II Ejercicios del curso de K.L. Claessen Introduction to Functional Programming"
+    putStrLn "\n Unidad 10: Estructura de datos "
+    let ejerciciosUnidad10 =
+            [("Ejemplo de sistema de ficheros", do
+                let sistema :: SistemaFicheros
+                    sistema =
+                        [ Fichero "apa"
+                        , Dir "bepa"
+                            [ Fichero "apa"
+                            , Dir "bepa" []
+                            , Dir "cepa" [Fichero "bepa"]
+                            ]
+                        , Dir "cepa"
+                            [ Dir "bepa" []
+                            , Dir "cepa" [Fichero "apa"]
+                            ]
+                        ]
+                putStrLn "Sistema de ficheros de ejemplo:"
+                print sistema),
+
+                ("Ejemplo de proposicion logica", do
+                let p1 = Var "p"
+                    p2 = Var "q"
+                    propEjemplo = (No p1) :| (p1 :& p2)
+                putStrLn "Ejemplo de proposicion logica:"
+                print propEjemplo), 
+
+                ("Ejemplo de proposicion logica", do
+                let p1 = Var "p"
+                    p2 = Var "q"
+                    propEjemplo = (No p1) :| (p1 :& p2)
+                putStrLn "Ejemplo de proposicion logica:"
+                print propEjemplo),
+                
+            ("Regresar", do
+                putStrLn "Regresando al menu principal..."
+                return ())]
+
+    mostrarMenu ejerciciosUnidad10
+---UNIDAD XI
+
+unidad11 :: IO ()
+unidad11 = do
+    putStrLn "\n II Ejercicios del curso de K.L. Claessen Introduction to Functional Programming"
+    putStrLn "\n Unidad 11: Analizadores "
+    let ejerciciosUnidad11 =
+            [("Probar analizador 'exito'", do
+                putStrLn "Ingrese un caracter o valor a analizar:"
+                x <- getLine
+                let valor = head x  -- tomamos el primer caracter
+                putStrLn "Ingrese la cadena de prueba:"
+                cadena <- getLine
+                putStrLn $ "Resultado de exito: " ++ show (exito valor cadena)),
+                            ("Regresar", do
+                putStrLn "Regresando al menu principal..."
+                return ())]
+    mostrarMenu ejerciciosUnidad11
+
+---UNIDAD XII
+
+unidad12 :: IO ()
+unidad12 = do
+    putStrLn "\n III Programacion avanzada y Aplicaciones "
+    putStrLn "\n Unidad 12: Busqueda en grafos y espacios de estados"
+    let ejerciciosUnidad12 =
+            []
+    mostrarMenu ejerciciosUnidad12
+
+---UNIDAD XIII
+
+unidad13 :: IO ()
+unidad13 = do
+    putStrLn "\n III Programacion avanzada y Aplicaciones "
+    putStrLn "\n Unidad 13: Juegos"
+    let ejerciciosUnidad13 =
+            []
+    mostrarMenu ejerciciosUnidad13
 
 --MENU PRINCIPAL
 main :: IO ()
 main = do
-    putStrLn "=== MENU PRINCIPAL ==="
+    putStrLn "  UNIDADES  "
     putStrLn "Seleccione unidad:"
-    putStrLn "1. Unidad 1: Introduccion a la programacion funcional"
-    putStrLn "2. Unidad 2: Algebra y numeros"
-    unidad <- getLine
-    case unidad of
-        "1" -> unidad1
-        "2" -> unidad2
+    putStrLn "1.Unidad I:     Introduccion a la programacion funcional"
+    putStrLn "2.Unidad II:    Numeros y Funciones "
+    putStrLn "3.Unidad III:   Estructura de datos "
+    putStrLn "4.Unidad VI:    Aplicaciones de programacion funcional "
+    putStrLn "5.Unidad V:     Introduccion a la programacion funcional "
+    putStrLn "6.Unidad VI:    Modernizacion y tipos de datos "
+    putStrLn "7.Unidad VII:   Recursion y tipos de datos "
+    putStrLn "8.Unidad VIII:  Lista de comprension "
+    putStrLn "9.Unidad IX:    Funciones de entrada y salida, Generacion de pruebas "
+    putStrLn "10.Unidad X:    Tipos de datos recursivos "
+    putStrLn "11.Unidad XI:   Analizadores "
+    putStrLn "12.Unidad XII:  Busqueda de grafos y espacios de estados "
+    putStrLn "13.Unidad XIII: Juegos "
+    putStrLn "0. Salir"
+    putStr "Ingrese su opcion: "
+    op <- readLn :: IO Int
+    case op of
+        1  -> unidad1 >> main
+        2  -> unidad2 >> main
+        3  -> unidad3 >> main
+        4  -> unidad4 >> main
+        5  -> unidad5 >> main
+        6  -> unidad6 >> main
+        7  -> unidad7 >> main
+        8  -> unidad8 >> main
+        9  -> unidad9 >> main
+        10 -> unidad10 >> main
+        11 -> unidad11 >> main
+        12 -> unidad12 >> main
+        13 -> unidad13 >> main
+        0  -> putStrLn "Saliendo del programa..."
         _   -> putStrLn "Opcion invalida"
+
